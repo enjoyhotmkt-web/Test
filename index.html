@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>日本季｜扭蛋抽獎</title>
+  <style>
+    :root{
+      --bg:#fbf3e6;
+      --card:#ffffff;
+      --ink:#3f3a36;
+      --muted:#6b5f56;
+      --red:#d94848;
+      --gold:#fbbf24;
+      --shadow: 0 18px 60px rgba(0,0,0,.16);
+      font-family: system-ui, -apple-system, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+    body{
+      margin:0;
+      min-height:100vh;
+      background: radial-gradient(900px 600px at 20% 10%, rgba(217,72,72,.10), transparent 60%),
+                  radial-gradient(900px 600px at 80% 20%, rgba(251,191,36,.10), transparent 55%),
+                  var(--bg);
+      display:grid;
+      place-items:center;
+      padding:18px;
+      color:var(--ink);
+    }
+    .wrap{ width:min(720px, 96vw); }
+    .header{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:12px;
+    }
+    .logo{
+      display:flex; align-items:center; gap:10px;
+    }
+    .logo img{
+      height:48px; width:auto; display:block;
+    }
+    .titlebox{ line-height:1.2; }
+    .title{
+      font-weight:1000; letter-spacing:.5px;
+      margin:0; font-size:22px; color:#7a2f2f;
+    }
+    .subtitle{
+      margin:6px 0 0; font-size:13px; color:var(--muted);
+    }
+    .badge{
+      font-size:12px; font-weight:900;
+      padding:8px 12px;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--gold), #fde68a);
+      color:#111;
+      white-space:nowrap;
+      box-shadow: 0 10px 24px rgba(251,191,36,.18);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+    }
+    @media (max-width: 820px){
+      .grid{ grid-template-columns: 1fr; }
+      .badge{ display:none; }
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,.06);
+    }
+
+    /* 左側：扭蛋互動 */
+    .stage{
+      padding:14px;
+      background: linear-gradient(180deg, rgba(251,243,230,.5), rgba(255,255,255,1));
+    }
+    .machineWrap{
+      position:relative;
+      display:grid;
+      place-items:center;
+      padding:10px;
+    }
+    .machineImg{
+      width:min(360px, 86%);
+      height:auto;
+      user-select:none;
+      -webkit-user-drag:none;
+      filter: drop-shadow(0 18px 24px rgba(0,0,0,.16));
+      transform-origin: 50% 70%;
+    }
+
+    .tapBtn{
+      position:absolute;
+      left: 8%;
+      bottom: 26%;
+      transform: translate(-10%, 0);
+      border:0;
+      cursor:pointer;
+      font-weight:1000;
+      letter-spacing:.5px;
+      padding:10px 14px;
+      border-radius:999px;
+      background: #fff;
+      color: var(--red);
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+      border: 2px solid rgba(217,72,72,.18);
+    }
+    .tapBtn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .hint{
+      margin-top:10px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    .result{
+      margin-top:12px;
+      border-radius:16px;
+      background: #fff;
+      border:2px dashed rgba(251,191,36,.8);
+      padding:12px 14px;
+      display:none;
+    }
+    .tier{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      font-weight:1000;
+      color:#7a2f2f;
+      background: rgba(251,191,36,.16);
+      border:1px solid rgba(251,191,36,.28);
+      padding:6px 10px;
+      border-radius:999px;
+    }
+    .prize{
+      margin:10px 0 0;
+      font-size:20px;
+      font-weight:1000;
+    }
+    .note{
+      margin:6px 0 0;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+    .meta{
+      margin-top:10px;
+      font-size:12px;
+      color:#8b8179;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .actions{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+    }
+    .btn{
+      flex:1;
+      border:0;
+      border-radius:14px;
+      padding:12px 14px;
+      font-weight:1000;
+      cursor:pointer;
+    }
+    .btnReset{ background:#e5e7eb; }
+    .btnFullscreen{
+      background:#111827;
+      color:#fff;
+    }
+
+    /* 右側：獎項說明 */
+    .side{
+      padding:14px;
+    }
+    .side h3{
+      margin:0 0 10px;
+      font-size:16px;
+      font-weight:1000;
+    }
+    .list{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:10px;
+    }
+    .item{
+      padding:10px 12px;
+      border-radius:14px;
+      background: rgba(0,0,0,.03);
+      border:1px solid rgba(0,0,0,.06);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .item b{ font-weight:1000; }
+    .pct{ color:#7a2f2f; font-weight:900; white-space:nowrap; }
+    .rule{
+      margin-top:12px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.7;
+      background: rgba(217,72,72,.06);
+      border:1px solid rgba(217,72,72,.12);
+      padding:10px 12px;
+      border-radius:14px;
+    }
+
+    /* 動畫 */
+    @keyframes wiggle {
+      0% { transform: rotate(0deg) scale(1); }
+      20% { transform: rotate(-2deg) scale(1.01); }
+      40% { transform: rotate(2deg) scale(1.01); }
+      60% { transform: rotate(-2deg) scale(1.01); }
+      80% { transform: rotate(2deg) scale(1.01); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+    .wiggle{ animation: wiggle 650ms ease-in-out; }
+
+    @keyframes pop {
+      0% { transform: translateY(6px); opacity:0; }
+      100% { transform: translateY(0); opacity:1; }
+    }
+    .pop{ animation: pop 240ms ease-out; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="logo">
+        <!-- 如果你有logo.png就會顯示；沒有也不影響 -->
+        <img src="logo.png" alt="LOGO" onerror="this.style.display='none'">
+        <div class="titlebox">
+          <h1 class="title">日本季｜扭蛋抽獎</h1>
+          <p class="subtitle">結帳當下由店內設備操作｜每桌限一次｜結果以櫃檯確認為準</p>
+        </div>
+      </div>
+      <div class="badge">店內限定</div>
+    </div>
+
+    <div class="grid">
+      <!-- 左：抽獎互動 -->
+      <div class="card">
+        <div class="stage">
+          <div class="machineWrap">
+            <img class="machineImg" id="machineImg" src="machine.jpg" alt="扭蛋機">
+
+            <button class="tapBtn" id="tapBtn">TAP！抽獎</button>
+          </div>
+
+          <div class="hint">
+            提示：按下抽獎後請交由櫃檯確認。<br>
+            若為「下次使用」獎項，請依活動規則與期限使用。
+          </div>
+
+          <div class="result" id="resultBox">
+            <span class="tier" id="tierTag">結果</span>
+            <div class="prize" id="prizeText">—</div>
+            <div class="note" id="prizeNote"></div>
+            <div class="meta">
+              <div>時間：<span id="timeText">—</span></div>
+              <div>本頁：<span id="deviceText">店內設備</span></div>
+            </div>
+
+            <div class="actions">
+              <button class="btn btnReset" id="resetBtn">重置</button>
+              <button class="btn btnFullscreen" id="fsBtn">全螢幕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右：獎項清單 -->
+      <div class="card">
+        <div class="side">
+          <h3>獎項與機率</h3>
+          <ul class="list">
+            <li class="item"><div><b>💎 單人免費用餐</b><div style="font-size:12px;color:#6b5f56;">最稀有大獎</div></div><div class="pct">0.5%</div></li>
+            <li class="item"><div><b>🎫 整組免服務費</b></div><div class="pct">10%</div></li>
+            <li class="item"><div><b>🎁 招待券100元</b><div style="font-size:12px;color:#6b5f56;">下次使用</div></div><div class="pct">10%</div></li>
+            <li class="item"><div><b>🥩 A5和牛（限量）</b><div style="font-size:12px;color:#6b5f56;">珍貴獎品</div></div><div class="pct">5%</div></li>
+            <li class="item"><div><b>🎂 壽星招待禮</b><div style="font-size:12px;color:#6b5f56;">中等獎品</div></div><div class="pct">20%</div></li>
+            <li class="item"><div><b>🛍️ 環保袋</b><div style="font-size:12px;color:#6b5f56;">基本獎品</div></div><div class="pct">54.5%</div></li>
+          </ul>
+
+          <div class="rule">
+            <b>活動規則（可改）</b><br>
+            1) 每桌限抽一次（結帳當下）。<br>
+            2) 下次使用獎項：請於日本季期間使用，不可併用其他優惠。<br>
+            3) 以櫃檯現場判定與兌換為準。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ✅ 你給的機率（總和 = 100%）
+  // 這裡用「權重」做抽獎：weight 就是百分比數字
+  const prizes = [
+    { tier: "A賞", name: "💎 單人免費用餐", note: "最稀有大獎。請依店內規則辦理（建議設為下次使用更保毛利）。", weight: 0.5 },
+    { tier: "B賞", name: "🎫 整組免服務費", note: "本次消費免收服務費（依現場規則）。", weight: 10 },
+    { tier: "C賞", name: "🎁 招待券100元", note: "下次使用。限日本季期間，不可併用其他優惠。", weight: 10 },
+    { tier: "B賞", name: "🥩 A5和牛（限量）", note: "現場兌換（若當日售罄可改提供等值替代）。", weight: 5 },
+    { tier: "C賞", name: "🎂 壽星招待禮", note: "現場兌換（以當日供應為準）。", weight: 20 },
+    { tier: "參加", name: "🛍️ 環保袋", note: "基本獎品，現場兌換。", weight: 54.5 }
+  ];
+
+  const tapBtn = document.getElementById("tapBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const fsBtn = document.getElementById("fsBtn");
+  const resultBox = document.getElementById("resultBox");
+  const tierTag = document.getElementById("tierTag");
+  const prizeText = document.getElementById("prizeText");
+  const prizeNote = document.getElementById("prizeNote");
+  const timeText = document.getElementById("timeText");
+  const deviceText = document.getElementById("deviceText");
+  const machineImg = document.getElementById("machineImg");
+
+  // 可自行改：顯示在畫面上的「設備名稱」
+  const DEVICE_NAME = "櫃檯平板";
+  deviceText.textContent = DEVICE_NAME;
+
+  function pickWeighted(items){
+    const total = items.reduce((s,x)=>s + x.weight, 0);
+    let r = Math.random() * total;
+    for(const it of items){
+      r -= it.weight;
+      if(r <= 0) return it;
+    }
+    return items[items.length - 1];
+  }
+
+  function draw(){
+    tapBtn.disabled = true;
+    resultBox.style.display = "none";
+
+    machineImg.classList.remove("wiggle");
+    void machineImg.offsetWidth; // reflow
+    machineImg.classList.add("wiggle");
+
+    setTimeout(()=>{
+      const p = pickWeighted(prizes);
+      tierTag.textContent = p.tier;
+      prizeText.textContent = p.name;
+      prizeNote.textContent = p.note;
+      timeText.textContent = new Date().toLocaleString("zh-Hant-TW");
+      resultBox.style.display = "block";
+      resultBox.classList.remove("pop");
+      void resultBox.offsetWidth;
+      resultBox.classList.add("pop");
+    }, 700);
+  }
+
+  function reset(){
+    resultBox.style.display = "none";
+    tapBtn.disabled = false;
+  }
+
+  tapBtn.addEventListener("click", draw);
+  resetBtn.addEventListener("click", reset);
+
+  fsBtn.addEventListener("click", async ()=>{
+    try{
+      if(!document.fullscreenElement){
+        await document.documentElement.requestFullscreen();
+      }else{
+        await document.exitFullscreen();
+      }
+    }catch(e){}
+  });
+</script>
+</body>
+</html>
