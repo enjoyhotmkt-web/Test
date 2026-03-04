@@ -82,10 +82,9 @@
       background: linear-gradient(180deg, rgba(251,243,230,.5), rgba(255,255,255,1));
     }
     .machineWrap{
-      position:relative;
       display:grid;
       place-items:center;
-      padding:10px;
+      padding:10px 10px 6px;
     }
     .machineImg{
       width:min(360px, 86%);
@@ -96,25 +95,33 @@
       transform-origin: 50% 70%;
     }
 
-    .tapBtn{
-      position:absolute;
-      left: 8%;
-      bottom: 26%;
-      transform: translate(-10%, 0);
+    /* ✅ 抽獎按鈕：在圖片正下方的獨立框 */
+    .drawBox{
+      margin-top:10px;
+      padding:12px;
+      border-radius:16px;
+      background: rgba(217,72,72,.06);
+      border:1px solid rgba(217,72,72,.14);
+      display:flex;
+      justify-content:center;
+    }
+    .drawBtn{
+      width:min(320px, 100%);
       border:0;
       cursor:pointer;
       font-weight:1000;
       letter-spacing:.5px;
-      padding:10px 14px;
-      border-radius:999px;
-      background: #fff;
-      color: var(--red);
-      box-shadow: 0 10px 24px rgba(0,0,0,.18);
-      border: 2px solid rgba(217,72,72,.18);
+      padding:14px 16px;
+      border-radius:14px;
+      background: linear-gradient(90deg, var(--red), #ef4444);
+      color:#fff;
+      box-shadow: 0 14px 26px rgba(217,72,72,.22);
+      font-size:16px;
     }
-    .tapBtn:disabled{
+    .drawBtn:disabled{
       opacity:.55;
       cursor:not-allowed;
+      box-shadow:none;
     }
 
     .hint{
@@ -179,10 +186,6 @@
       cursor:pointer;
     }
     .btnReset{ background:#e5e7eb; }
-    .btnFullscreen{
-      background:#111827;
-      color:#fff;
-    }
 
     /* 右側：獎項說明 */
     .side{
@@ -246,7 +249,6 @@
   <div class="wrap">
     <div class="header">
       <div class="logo">
-        <!-- 如果你有logo.png就會顯示；沒有也不影響 -->
         <img src="logo.png" alt="LOGO" onerror="this.style.display='none'">
         <div class="titlebox">
           <h1 class="title">日本季｜扭蛋抽獎</h1>
@@ -263,12 +265,14 @@
           <div class="machineWrap">
             <img class="machineImg" id="machineImg" src="machine.jpg" alt="扭蛋機">
 
-            <button class="tapBtn" id="tapBtn">TAP！抽獎</button>
+            <!-- ✅ 抽獎按鈕：圖片正下方 -->
+            <div class="drawBox">
+              <button class="drawBtn" id="drawBtn">按我抽獎</button>
+            </div>
           </div>
 
           <div class="hint">
-            提示：按下抽獎後請交由櫃檯確認。<br>
-            若為「下次使用」獎項，請依活動規則與期限使用。
+            提示：抽完請交由櫃檯確認。若為「下次使用」獎項，請依活動規則與期限使用。
           </div>
 
           <div class="result" id="resultBox">
@@ -277,12 +281,12 @@
             <div class="note" id="prizeNote"></div>
             <div class="meta">
               <div>時間：<span id="timeText">—</span></div>
-              <div>本頁：<span id="deviceText">店內設備</span></div>
+              <div>設備：<span id="deviceText">店內設備</span></div>
             </div>
 
             <div class="actions">
+              <!-- ✅ 移除全螢幕，只保留重置 -->
               <button class="btn btnReset" id="resetBtn">重置</button>
-              <button class="btn btnFullscreen" id="fsBtn">全螢幕</button>
             </div>
           </div>
         </div>
@@ -313,8 +317,10 @@
   </div>
 
 <script>
+  // ✅ 重置密碼
+  const RESET_PASSWORD = "16888";
+
   // ✅ 你給的機率（總和 = 100%）
-  // 這裡用「權重」做抽獎：weight 就是百分比數字
   const prizes = [
     { tier: "A賞", name: "💎 單人免費用餐", note: "最稀有大獎。請依店內規則辦理（建議設為下次使用更保毛利）。", weight: 0.5 },
     { tier: "B賞", name: "🎫 整組免服務費", note: "本次消費免收服務費（依現場規則）。", weight: 10 },
@@ -324,9 +330,8 @@
     { tier: "參加", name: "🛍️ 環保袋", note: "基本獎品，現場兌換。", weight: 54.5 }
   ];
 
-  const tapBtn = document.getElementById("tapBtn");
+  const drawBtn = document.getElementById("drawBtn");
   const resetBtn = document.getElementById("resetBtn");
-  const fsBtn = document.getElementById("fsBtn");
   const resultBox = document.getElementById("resultBox");
   const tierTag = document.getElementById("tierTag");
   const prizeText = document.getElementById("prizeText");
@@ -335,7 +340,6 @@
   const deviceText = document.getElementById("deviceText");
   const machineImg = document.getElementById("machineImg");
 
-  // 可自行改：顯示在畫面上的「設備名稱」
   const DEVICE_NAME = "櫃檯平板";
   deviceText.textContent = DEVICE_NAME;
 
@@ -350,11 +354,11 @@
   }
 
   function draw(){
-    tapBtn.disabled = true;
+    drawBtn.disabled = true;
     resultBox.style.display = "none";
 
     machineImg.classList.remove("wiggle");
-    void machineImg.offsetWidth; // reflow
+    void machineImg.offsetWidth;
     machineImg.classList.add("wiggle");
 
     setTimeout(()=>{
@@ -363,6 +367,7 @@
       prizeText.textContent = p.name;
       prizeNote.textContent = p.note;
       timeText.textContent = new Date().toLocaleString("zh-Hant-TW");
+
       resultBox.style.display = "block";
       resultBox.classList.remove("pop");
       void resultBox.offsetWidth;
@@ -370,23 +375,20 @@
     }, 700);
   }
 
-  function reset(){
+  function resetWithPassword(){
+    const input = prompt("請輸入重置密碼");
+    if (input === null) return; // 使用者取消
+    if (String(input).trim() !== RESET_PASSWORD){
+      alert("密碼錯誤，無法重置。");
+      return;
+    }
+    // ✅ 重置：允許再抽
     resultBox.style.display = "none";
-    tapBtn.disabled = false;
+    drawBtn.disabled = false;
   }
 
-  tapBtn.addEventListener("click", draw);
-  resetBtn.addEventListener("click", reset);
-
-  fsBtn.addEventListener("click", async ()=>{
-    try{
-      if(!document.fullscreenElement){
-        await document.documentElement.requestFullscreen();
-      }else{
-        await document.exitFullscreen();
-      }
-    }catch(e){}
-  });
+  drawBtn.addEventListener("click", draw);
+  resetBtn.addEventListener("click", resetWithPassword);
 </script>
 </body>
 </html>
