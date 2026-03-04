@@ -1,394 +1,268 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>日本季｜扭蛋抽獎</title>
-  <style>
-    :root{
-      --bg:#fbf3e6;
-      --card:#ffffff;
-      --ink:#3f3a36;
-      --muted:#6b5f56;
-      --red:#d94848;
-      --gold:#fbbf24;
-      --shadow: 0 18px 60px rgba(0,0,0,.16);
-      font-family: system-ui, -apple-system, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    }
-    body{
-      margin:0;
-      min-height:100vh;
-      background: radial-gradient(900px 600px at 20% 10%, rgba(217,72,72,.10), transparent 60%),
-                  radial-gradient(900px 600px at 80% 20%, rgba(251,191,36,.10), transparent 55%),
-                  var(--bg);
-      display:grid;
-      place-items:center;
-      padding:18px;
-      color:var(--ink);
-    }
-    .wrap{ width:min(720px, 96vw); }
-    .header{
-      display:flex;
-      gap:14px;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:12px;
-    }
-    .logo{
-      display:flex; align-items:center; gap:10px;
-    }
-    .logo img{
-      height:48px; width:auto; display:block;
-    }
-    .titlebox{ line-height:1.2; }
-    .title{
-      font-weight:1000; letter-spacing:.5px;
-      margin:0; font-size:22px; color:#7a2f2f;
-    }
-    .subtitle{
-      margin:6px 0 0; font-size:13px; color:var(--muted);
-    }
-    .badge{
-      font-size:12px; font-weight:900;
-      padding:8px 12px;
-      border-radius:999px;
-      background: linear-gradient(90deg, var(--gold), #fde68a);
-      color:#111;
-      white-space:nowrap;
-      box-shadow: 0 10px 24px rgba(251,191,36,.18);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本季扭蛋抽獎</title>
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap:14px;
-    }
-    @media (max-width: 820px){
-      .grid{ grid-template-columns: 1fr; }
-      .badge{ display:none; }
-    }
+<style>
 
-    .card{
-      background:var(--card);
-      border-radius:18px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      border:1px solid rgba(0,0,0,.06);
-    }
+body{
+font-family: "Microsoft JhengHei", sans-serif;
+background:#fbf3e6;
+text-align:center;
+margin:0;
+padding:20px;
+}
 
-    /* 左側：扭蛋互動 */
-    .stage{
-      padding:14px;
-      background: linear-gradient(180deg, rgba(251,243,230,.5), rgba(255,255,255,1));
-    }
-    .machineWrap{
-      display:grid;
-      place-items:center;
-      padding:10px 10px 6px;
-    }
-    .machineImg{
-      width:min(360px, 86%);
-      height:auto;
-      user-select:none;
-      -webkit-user-drag:none;
-      filter: drop-shadow(0 18px 24px rgba(0,0,0,.16));
-      transform-origin: 50% 70%;
-    }
+.container{
+max-width:500px;
+margin:auto;
+}
 
-    /* ✅ 抽獎按鈕：在圖片正下方的獨立框 */
-    .drawBox{
-      margin-top:10px;
-      padding:12px;
-      border-radius:16px;
-      background: rgba(217,72,72,.06);
-      border:1px solid rgba(217,72,72,.14);
-      display:flex;
-      justify-content:center;
-    }
-    .drawBtn{
-      width:min(320px, 100%);
-      border:0;
-      cursor:pointer;
-      font-weight:1000;
-      letter-spacing:.5px;
-      padding:14px 16px;
-      border-radius:14px;
-      background: linear-gradient(90deg, var(--red), #ef4444);
-      color:#fff;
-      box-shadow: 0 14px 26px rgba(217,72,72,.22);
-      font-size:16px;
-    }
-    .drawBtn:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-      box-shadow:none;
-    }
+.logo{
+height:60px;
+margin-bottom:10px;
+}
 
-    .hint{
-      margin-top:10px;
-      text-align:center;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.6;
-    }
+.machine{
+width:80%;
+max-width:300px;
+margin:auto;
+display:block;
+}
 
-    .result{
-      margin-top:12px;
-      border-radius:16px;
-      background: #fff;
-      border:2px dashed rgba(251,191,36,.8);
-      padding:12px 14px;
-      display:none;
-    }
-    .tier{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size:12px;
-      font-weight:1000;
-      color:#7a2f2f;
-      background: rgba(251,191,36,.16);
-      border:1px solid rgba(251,191,36,.28);
-      padding:6px 10px;
-      border-radius:999px;
-    }
-    .prize{
-      margin:10px 0 0;
-      font-size:20px;
-      font-weight:1000;
-    }
-    .note{
-      margin:6px 0 0;
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.6;
-    }
-    .meta{
-      margin-top:10px;
-      font-size:12px;
-      color:#8b8179;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .actions{
-      margin-top:12px;
-      display:flex;
-      gap:10px;
-    }
-    .btn{
-      flex:1;
-      border:0;
-      border-radius:14px;
-      padding:12px 14px;
-      font-weight:1000;
-      cursor:pointer;
-    }
-    .btnReset{ background:#e5e7eb; }
+.draw-area{
+margin-top:15px;
+padding:10px;
+border-radius:12px;
+background:#fff3f3;
+border:1px solid #ffd0d0;
+}
 
-    /* 右側：獎項說明 */
-    .side{
-      padding:14px;
-    }
-    .side h3{
-      margin:0 0 10px;
-      font-size:16px;
-      font-weight:1000;
-    }
-    .list{
-      margin:0;
-      padding:0;
-      list-style:none;
-      display:grid;
-      gap:10px;
-    }
-    .item{
-      padding:10px 12px;
-      border-radius:14px;
-      background: rgba(0,0,0,.03);
-      border:1px solid rgba(0,0,0,.06);
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .item b{ font-weight:1000; }
-    .pct{ color:#7a2f2f; font-weight:900; white-space:nowrap; }
-    .rule{
-      margin-top:12px;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.7;
-      background: rgba(217,72,72,.06);
-      border:1px solid rgba(217,72,72,.12);
-      padding:10px 12px;
-      border-radius:14px;
-    }
+.draw-btn{
+background:#d94848;
+color:white;
+border:none;
+padding:14px 20px;
+font-size:18px;
+border-radius:10px;
+cursor:pointer;
+width:100%;
+}
 
-    /* 動畫 */
-    @keyframes wiggle {
-      0% { transform: rotate(0deg) scale(1); }
-      20% { transform: rotate(-2deg) scale(1.01); }
-      40% { transform: rotate(2deg) scale(1.01); }
-      60% { transform: rotate(-2deg) scale(1.01); }
-      80% { transform: rotate(2deg) scale(1.01); }
-      100% { transform: rotate(0deg) scale(1); }
-    }
-    .wiggle{ animation: wiggle 650ms ease-in-out; }
+.draw-btn:disabled{
+opacity:0.5;
+}
 
-    @keyframes pop {
-      0% { transform: translateY(6px); opacity:0; }
-      100% { transform: translateY(0); opacity:1; }
-    }
-    .pop{ animation: pop 240ms ease-out; }
-  </style>
+.result{
+margin-top:20px;
+padding:15px;
+border:2px dashed #fbbf24;
+border-radius:12px;
+display:none;
+background:white;
+}
+
+.result h2{
+margin:5px 0;
+}
+
+.reset-btn{
+margin-top:10px;
+background:#ddd;
+border:none;
+padding:10px;
+border-radius:8px;
+cursor:pointer;
+width:100%;
+}
+
+/* 彈窗 */
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+display:none;
+align-items:center;
+justify-content:center;
+}
+
+.modal-box{
+background:white;
+padding:20px;
+border-radius:10px;
+width:260px;
+}
+
+.modal-box input{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.modal-buttons{
+margin-top:15px;
+display:flex;
+gap:10px;
+}
+
+.modal-buttons button{
+flex:1;
+padding:10px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.confirm{
+background:#d94848;
+color:white;
+}
+
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="header">
-      <div class="logo">
-        <img src="logo.png" alt="LOGO" onerror="this.style.display='none'">
-        <div class="titlebox">
-          <h1 class="title">日本季｜扭蛋抽獎</h1>
-          <p class="subtitle">結帳當下由店內設備操作｜每桌限一次｜結果以櫃檯確認為準</p>
-        </div>
-      </div>
-      <div class="badge">店內限定</div>
-    </div>
 
-    <div class="grid">
-      <!-- 左：抽獎互動 -->
-      <div class="card">
-        <div class="stage">
-          <div class="machineWrap">
-            <img class="machineImg" id="machineImg" src="machine.jpg" alt="扭蛋機">
+<div class="container">
 
-            <!-- ✅ 抽獎按鈕：圖片正下方 -->
-            <div class="drawBox">
-              <button class="drawBtn" id="drawBtn">按我抽獎</button>
-            </div>
-          </div>
+<img src="logo.png" class="logo">
 
-          <div class="hint">
-            提示：抽完請交由櫃檯確認。若為「下次使用」獎項，請依活動規則與期限使用。
-          </div>
+<h2>日本季扭蛋抽獎</h2>
 
-          <div class="result" id="resultBox">
-            <span class="tier" id="tierTag">結果</span>
-            <div class="prize" id="prizeText">—</div>
-            <div class="note" id="prizeNote"></div>
-            <div class="meta">
-              <div>時間：<span id="timeText">—</span></div>
-              <div>設備：<span id="deviceText">店內設備</span></div>
-            </div>
+<img src="machine.jpg" class="machine" id="machine">
 
-            <div class="actions">
-              <!-- ✅ 移除全螢幕，只保留重置 -->
-              <button class="btn btnReset" id="resetBtn">重置</button>
-            </div>
-          </div>
-        </div>
-      </div>
+<div class="draw-area">
+<button class="draw-btn" id="drawBtn">按我抽獎</button>
+</div>
 
-      <!-- 右：獎項清單 -->
-      <div class="card">
-        <div class="side">
-          <h3>獎項與機率</h3>
-          <ul class="list">
-            <li class="item"><div><b>💎 單人免費用餐</b><div style="font-size:12px;color:#6b5f56;">最稀有大獎</div></div><div class="pct">0.5%</div></li>
-            <li class="item"><div><b>🎫 整組免服務費</b></div><div class="pct">10%</div></li>
-            <li class="item"><div><b>🎁 招待券100元</b><div style="font-size:12px;color:#6b5f56;">下次使用</div></div><div class="pct">10%</div></li>
-            <li class="item"><div><b>🥩 A5和牛（限量）</b><div style="font-size:12px;color:#6b5f56;">珍貴獎品</div></div><div class="pct">5%</div></li>
-            <li class="item"><div><b>🎂 壽星招待禮</b><div style="font-size:12px;color:#6b5f56;">中等獎品</div></div><div class="pct">20%</div></li>
-            <li class="item"><div><b>🛍️ 環保袋</b><div style="font-size:12px;color:#6b5f56;">基本獎品</div></div><div class="pct">54.5%</div></li>
-          </ul>
+<div class="result" id="resultBox">
+<h3 id="tier"></h3>
+<h2 id="prize"></h2>
+<p id="note"></p>
 
-          <div class="rule">
-            <b>活動規則（可改）</b><br>
-            1) 每桌限抽一次（結帳當下）。<br>
-            2) 下次使用獎項：請於日本季期間使用，不可併用其他優惠。<br>
-            3) 以櫃檯現場判定與兌換為準。
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<button class="reset-btn" id="resetBtn">重置</button>
+</div>
+
+</div>
+
+<!-- 密碼彈窗 -->
+
+<div class="modal" id="modal">
+<div class="modal-box">
+
+<h3>輸入重置密碼</h3>
+
+<input type="password" id="passwordInput">
+
+<div class="modal-buttons">
+<button id="cancelBtn">取消</button>
+<button class="confirm" id="confirmBtn">確認</button>
+</div>
+
+</div>
+</div>
 
 <script>
-  // ✅ 重置密碼
-  const RESET_PASSWORD = "16888";
 
-  // ✅ 你給的機率（總和 = 100%）
-  const prizes = [
-    { tier: "A賞", name: "💎 單人免費用餐", note: "最稀有大獎。請依店內規則辦理（建議設為下次使用更保毛利）。", weight: 0.5 },
-    { tier: "B賞", name: "🎫 整組免服務費", note: "本次消費免收服務費（依現場規則）。", weight: 10 },
-    { tier: "C賞", name: "🎁 招待券100元", note: "下次使用。限日本季期間，不可併用其他優惠。", weight: 10 },
-    { tier: "B賞", name: "🥩 A5和牛（限量）", note: "現場兌換（若當日售罄可改提供等值替代）。", weight: 5 },
-    { tier: "C賞", name: "🎂 壽星招待禮", note: "現場兌換（以當日供應為準）。", weight: 20 },
-    { tier: "參加", name: "🛍️ 環保袋", note: "基本獎品，現場兌換。", weight: 54.5 }
-  ];
+const prizes=[
+{tier:"A賞",name:"💎 單人免費用餐",note:"最稀有大獎",weight:0.5},
+{tier:"B賞",name:"🎫 整組免服務費",note:"現場使用",weight:10},
+{tier:"C賞",name:"🎁 招待券100元",note:"下次使用",weight:10},
+{tier:"B賞",name:"🥩 A5和牛",note:"限量獎品",weight:5},
+{tier:"C賞",name:"🎂 壽星招待禮",note:"現場兌換",weight:20},
+{tier:"參加",name:"🛍️ 環保袋",note:"基本獎品",weight:54.5}
+]
 
-  const drawBtn = document.getElementById("drawBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const resultBox = document.getElementById("resultBox");
-  const tierTag = document.getElementById("tierTag");
-  const prizeText = document.getElementById("prizeText");
-  const prizeNote = document.getElementById("prizeNote");
-  const timeText = document.getElementById("timeText");
-  const deviceText = document.getElementById("deviceText");
-  const machineImg = document.getElementById("machineImg");
+const drawBtn=document.getElementById("drawBtn")
+const resultBox=document.getElementById("resultBox")
+const prizeText=document.getElementById("prize")
+const tierText=document.getElementById("tier")
+const noteText=document.getElementById("note")
+const machine=document.getElementById("machine")
 
-  const DEVICE_NAME = "櫃檯平板";
-  deviceText.textContent = DEVICE_NAME;
+const modal=document.getElementById("modal")
+const passwordInput=document.getElementById("passwordInput")
 
-  function pickWeighted(items){
-    const total = items.reduce((s,x)=>s + x.weight, 0);
-    let r = Math.random() * total;
-    for(const it of items){
-      r -= it.weight;
-      if(r <= 0) return it;
-    }
-    return items[items.length - 1];
-  }
+function pickPrize(){
 
-  function draw(){
-    drawBtn.disabled = true;
-    resultBox.style.display = "none";
+let total=0
 
-    machineImg.classList.remove("wiggle");
-    void machineImg.offsetWidth;
-    machineImg.classList.add("wiggle");
+prizes.forEach(p=>total+=p.weight)
 
-    setTimeout(()=>{
-      const p = pickWeighted(prizes);
-      tierTag.textContent = p.tier;
-      prizeText.textContent = p.name;
-      prizeNote.textContent = p.note;
-      timeText.textContent = new Date().toLocaleString("zh-Hant-TW");
+let r=Math.random()*total
 
-      resultBox.style.display = "block";
-      resultBox.classList.remove("pop");
-      void resultBox.offsetWidth;
-      resultBox.classList.add("pop");
-    }, 700);
-  }
+for(let p of prizes){
+r-=p.weight
+if(r<=0) return p
+}
 
-  function resetWithPassword(){
-    const input = prompt("請輸入重置密碼");
-    if (input === null) return; // 使用者取消
-    if (String(input).trim() !== RESET_PASSWORD){
-      alert("密碼錯誤，無法重置。");
-      return;
-    }
-    // ✅ 重置：允許再抽
-    resultBox.style.display = "none";
-    drawBtn.disabled = false;
-  }
+}
 
-  drawBtn.addEventListener("click", draw);
-  resetBtn.addEventListener("click", resetWithPassword);
+drawBtn.onclick=function(){
+
+drawBtn.disabled=true
+
+machine.style.transform="rotate(-5deg)"
+
+setTimeout(()=>{
+
+machine.style.transform="rotate(5deg)"
+
+},200)
+
+setTimeout(()=>{
+
+machine.style.transform="rotate(0deg)"
+
+const p=pickPrize()
+
+tierText.innerText=p.tier
+prizeText.innerText=p.name
+noteText.innerText=p.note
+
+resultBox.style.display="block"
+
+},500)
+
+}
+
+resetBtn.onclick=function(){
+
+modal.style.display="flex"
+
+}
+
+cancelBtn.onclick=function(){
+
+modal.style.display="none"
+
+}
+
+confirmBtn.onclick=function(){
+
+if(passwordInput.value==="16888"){
+
+modal.style.display="none"
+resultBox.style.display="none"
+drawBtn.disabled=false
+
+}else{
+
+alert("密碼錯誤")
+
+}
+
+}
+
 </script>
+
 </body>
 </html>
